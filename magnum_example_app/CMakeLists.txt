@@ -26,8 +26,8 @@ endif()
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/pthom/hunter/archive/dummy-release.tar.gz"
-    SHA1 "d2f494d3c11d6803e196c5e338cc7eb459ea321b"
+    URL "https://github.com/pthom/hunter/archive/magnum_hunter_v7.tar.gz"
+    SHA1 "76032a6ea7d3496dc3e79b55c797713e229a3685"
   )
 project(MagnumPrimitivesExample)
 hunter_add_package(magnum)
