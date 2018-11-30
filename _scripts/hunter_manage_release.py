@@ -9,10 +9,13 @@ import subprocess
 import urllib.request
 import hashlib
 import typing
+import shutil
+
 
 # Predefined types for clarity
 ReleaseName = typing.NewType("ReleaseName", str)
 TargetBranch = typing.NewType("TargetBranch", str)
+Toolchain = typing.NewType("Toolchain", str)
 HunterProjectName = typing.NewType("HunterProjectName", str)
 Sha1String = typing.NewType("Sha1String", str)
 Url = typing.NewType("Url", str)
@@ -162,12 +165,11 @@ def project_create_release(
         release_name: ReleaseName,
         target_branch: TargetBranch
         ) -> (Url, Sha1String):
-  # release_url, sha1 = _project_create_release_do_release(
-  #   hunter_project_name=hunter_project_name,
-  #   release_name=release_name,
-  #   target_branch=target_branch
-  # )
-  release_url, sha1 = "my_url", "my_sha1"
+  release_url, sha1 = _project_create_release_do_release(
+    hunter_project_name=hunter_project_name,
+    release_name=release_name,
+    target_branch=target_branch
+  )
 
   hunter_cmake_filename, cmake_code = _hunter_add_version_code(
     hunter_project_name = hunter_project_name,
@@ -198,13 +200,47 @@ def project_delete_release(hunter_project_name: HunterProjectName, release_name:
   my_run_command(cmd, repo_folder)
 
 
+def test_build(app_folder: Folder, clean):
+  app_folder = MAIN_REPO + app_folder
+  build_folder = app_folder + "/build"
+  if clean:
+    if os.path.isdir(build_folder):
+      shutil.rmtree(build_folder)
+  if not os.path.isdir(build_folder):
+    os.mkdir(build_folder)
+  my_run_command("cmake .. -GNinja -DHUNTER_ENABLED=ON", build_folder)
+  my_run_command("ninja", build_folder)
+
+def add_polly_path():
+  polly_bin_path = ":{}polly/bin".format(MAIN_REPO)
+  os.environ["PATH"] = os.environ["PATH"] + ":" + polly_bin_path
+
+
+def polly_help():
+  add_polly_path()
+  my_run_command("polly.py --help", HUNTER_REPO)
+
+
+def hunter_test_build(hunter_project_name: HunterProjectName, toolchain: Toolchain):
+  add_polly_path()
+  cmd = "TOOLCHAIN={} PROJECT_DIR=examples/{} ./jenkins.py".format(toolchain, hunter_project_name)
+  my_run_command(cmd, HUNTER_REPO)
+
+
+
+
 def help():
   help_str = """
 Usage:
 {0} project_create_release HunterProjectName TargetBranch ReleaseName
 {0} project_delete_release HunterProjectName ReleaseName
+{0} test_build app_folder [clean]
+{0} hunter_test_build HunterProjectName Toolchain
+{0} hunter_list_toolchains
 """.format(sys.argv[0])
   print(help_str)
+
+
 
 
 def main():
@@ -226,6 +262,18 @@ def main():
     hunter_project_name = sys.argv[2]
     release_name = sys.argv[3]
     project_delete_release(hunter_project_name, release_name)
+  elif command == "test_build":
+    app_folder = sys.argv[2]
+    clean = False
+    if len(sys.argv) > 3 and sys.argv[3] == "clean":
+      clean = True
+    test_build(app_folder, clean)
+  elif command == "hunter_test_build":
+    hunter_project_name = sys.argv[2]
+    toolchain = sys.argv[3]
+    hunter_test_build(hunter_project_name, toolchain)
+  elif command == "hunter_list_toolchains":
+    polly_help()
   else:
     help()
 
