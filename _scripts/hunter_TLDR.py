@@ -40,6 +40,19 @@ def cli():
   """
   This script tries to simplify most of the manual actions described in
   https://docs.hunter.sh/en/latest/creating-new/create/cmake.html
+
+  \b
+  Info about hunter branching model:
+    * branch pr.project_name = pull request candidate for hunter repo
+            (https://github.com/ruslo/hunter)
+    * branch pr.pkg.project_name = pull request candidate for hunter package testing templates
+            (https://github.com/ingenue/hunter)
+            this branch shall contains only modifications to appveyor.yml and .travis.yml
+    * branch test.project_name = this branch contains all the modifications
+      (packages and version + appveyor/travis)
+      This branch can be pushed to your own fork of hunter, so that you can test
+      the build through Appveyor and Travis.
+
   """
   pass
 
@@ -133,6 +146,12 @@ def _my_run_command(cmd: Command, cwd: Folder):
   subprocess.run(cmd, cwd = cwd, check=True, shell=True)
 
 
+def _my_run_command_get_output(cmd: Command, cwd: Folder):
+  result = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True)
+  out = result.stdout.decode("utf-8")
+  return out
+
+
 def _github_url_to_url(git_url: GitUrl) -> Url:
   result = git_url.replace("git@github.com:", "https://github.com/")
   result = result.replace(".git", "")
@@ -142,8 +161,7 @@ def _github_url_to_url(git_url: GitUrl) -> Url:
 def _get_project_push_url(project: HunterProjectName) -> GitUrl:
   print("get_project_push_url({})".format(project))
   repo_folder = MAIN_REPO + project
-  result = subprocess.run("git remote show origin", shell=True, cwd=repo_folder, capture_output=True)
-  out = result.stdout.decode("utf-8")
+  out = _my_run_command_get_output("git remote show origin", cwd=repo_folder)
   out_lines = out.split("\n")
   for line in out_lines:
     if "Push  URL:" in line:
@@ -271,6 +289,99 @@ def hunter_list_toolchains():
   """
   _add_polly_path()
   _my_run_command("polly.py --help", HUNTER_REPO)
+
+
+def _is_git_repo_clean(folder: Folder) -> bool:
+  out = _my_run_command_get_output("git status", cwd=folder)
+  lines = out.split("\n")
+  is_clean = any( [ "working tree clean" in line for line in lines] )
+  return is_clean
+
+def _git_branch(folder: Folder) -> str:
+  out = _my_run_command_get_output("git branch", cwd=folder)
+  lines = out.split("\n")
+  def is_current_branch(branch_name):
+    return len(branch_name) > 0 and branch_name[0] == '*'
+  current_branches = filter(is_current_branch, lines)
+  current_branch = list(current_branches)[0].replace("* ", "")
+  return current_branch
+
+
+@cli.command()
+@click.argument("release_name", required=True)
+def hunter_prepare_release(release_name):
+  """
+  Prepare a release for hunter
+
+  \b
+  What it does:
+  * Checks that your hunter submodule status is clean
+  * Checks that your hunter submodule status is on a test.[project_name] branch
+  * Prepare hunter branch "pr.project_name":
+    This branch will be identical to your current branch, except that
+    it will reset the modification to appveyor.yml and .travis.yml so that they match
+    the version of hunter master branch
+    (This branch must have been created manually)
+  * Force push the branch pr.project_name to github
+  * Return you to the branch test.project_name
+  * Publish a release on your hunter fork
+  * Assist you to use this hunter release in a sample app
+  """
+  # Checks that your hunter submodule status is clean
+  if not _is_git_repo_clean(HUNTER_REPO):
+    print("Your hunter repo is not clean : abort")
+    return False
+  # Checks that your hunter submodule status is on a test.[project_name] branch
+  test_git_branch = _git_branch(HUNTER_REPO)
+  if not test_git_branch.find("test.") == 0:
+    print("Your hunter repo should be on a test.[project_name] branch : abort")
+    return False
+  project_name = test_git_branch.split(".")[1]
+  print("project_name = " + project_name)
+  print("test_git_branch = " + test_git_branch)
+  # Prepare hunter branch "pr.project_name":
+  #   This branch will be identical to your current branch, except that
+  #   it will reset the modification to appveyor.yml and .travis.yml so that they match
+  #   the version of hunter master branch
+  pr_pkg_git_branch = "pr.pkg." + project_name
+  print("pr_pkg_git_branch = " + pr_pkg_git_branch)
+
+  print("About to run these commands (in order, in subrepo hunter)")
+  print("*********************************************************")
+  commands = [
+    "git branch -D {} || true # ==> *delete* old branch !".format(pr_pkg_git_branch),
+    "git checkout -b {} # ==> *recreate* branch from scratch!".format(pr_pkg_git_branch),
+    "rm appveyor.yml && rm .travis.yml # ===> ({} should not contain travis/appveyor.yml".format(pr_pkg_git_branch),
+    "cp ../travis-hunter-master.yml .travis.yml #  ==> copy .travis.yml from master",
+    "git add .travis.yml appveyor.yml && git commit -m \"use master branch .travis.yml\" #   ==> git commit !",
+    "git push origin {} --force -u #   ==> git push force !".format(pr_pkg_git_branch),
+    "git checkout {} #   ==> return to the test branch !".format(test_git_branch)
+  ]
+  i = 1
+  for cmd in commands:
+    print("            {}. {}".format(i, cmd))
+    i = i + 1
+
+
+  i = 1
+  for cmd in commands:
+    print("About to run : \n")
+    print("            {}. {}".format(i, cmd))
+    i = i + 1
+    answer = input("Really do it ? Type y to confirm: ")
+    if answer == "y":
+      _my_run_command(cmd, HUNTER_REPO)
+
+  answer = input("Create hunter release on github ? Type y to confirm: ")
+  if answer == "y":
+    release_url, sha1 = _project_create_release_do_release(
+      hunter_project_name="hunter",
+      release_name=release_name,
+      target_branch=pr_pkg_git_branch
+    )
+    print("Release url:" + release_url)
+    print("sha1:" + sha1)
+
 
 
 @cli.command()
