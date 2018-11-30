@@ -308,8 +308,7 @@ def _git_branch(folder: Folder) -> str:
 
 
 @cli.command()
-@click.argument("release_name", required=True)
-def hunter_prepare_release(release_name):
+def hunter_prepare_release():
   """
   Prepare a release for hunter
 
@@ -324,8 +323,6 @@ def hunter_prepare_release(release_name):
     (This branch must have been created manually)
   * Force push the branch pr.project_name to github
   * Return you to the branch test.project_name
-  * Publish a release on your hunter fork
-  * Assist you to use this hunter release in a sample app
   """
   # Checks that your hunter submodule status is clean
   if not _is_git_repo_clean(HUNTER_REPO):
@@ -372,15 +369,65 @@ def hunter_prepare_release(release_name):
     if answer == "y":
       _my_run_command(cmd, HUNTER_REPO)
 
+
+def _cmake_code_use_hunter_release(url: Url, sha1: Sha1String) -> CmakeCode:
+  code = """
+  HunterGate(
+    URL "__url__"
+    SHA1 "__sha1__"
+  )
+  """
+  code = code.replace("__url__", url)
+  code = code.replace("__sha1__", sha1)
+  return code
+
+
+@cli.command()
+@click.argument("release_name", required=True)
+def hunter_delete_release(release_name: ReleaseName):
+  """
+  Deletes a hunter release on github
+  """
+  repo_folder = HUNTER_REPO
+  cmd = "hub release delete {0}".format(release_name)
+  _my_run_command(cmd, repo_folder)
+
+
+@cli.command()
+@click.argument("release_name", required=True)
+def hunter_create_release(release_name: ReleaseName):
+  """
+  Publish a release on your hunter fork and assist you to use this hunter release in a sample app
+  """
   answer = input("Create hunter release on github ? Type y to confirm: ")
-  if answer == "y":
-    release_url, sha1 = _project_create_release_do_release(
-      hunter_project_name="hunter",
-      release_name=release_name,
-      target_branch=pr_pkg_git_branch
-    )
-    print("Release url:" + release_url)
-    print("sha1:" + sha1)
+  if answer != "y":
+    print("abort")
+    return False
+
+  test_git_branch = _git_branch(HUNTER_REPO)
+  if not test_git_branch.find("test.") == 0:
+    print("Your hunter repo should be on a test.[project_name] branch : abort")
+    return False
+  project_name = test_git_branch.split(".")[1]
+  pr_pkg_git_branch = "pr.pkg." + project_name
+  print("project_name = " + project_name)
+  print("test_git_branch = " + test_git_branch)
+  print("pr_pkg_git_branch = " + pr_pkg_git_branch)
+
+  release_url, sha1 = _project_create_release_do_release(
+    hunter_project_name="hunter",
+    release_name=release_name,
+    target_branch=pr_pkg_git_branch
+  )
+  print("Release url:" + release_url)
+  print("sha1:" + sha1)
+  cmake_code  = _cmake_code_use_hunter_release(release_url, sha1)
+  print("Here is the code in order to use this release:")
+  print("**********************************************")
+  print(cmake_code)
+  print("**********************************************")
+  dst_file = "magnum_example_app/CMakeLists.txt"
+  print("put is inside {}".format(dst_file))
 
 
 
