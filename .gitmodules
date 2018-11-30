@@ -4,3 +4,6 @@
 [submodule "magnum"]
 	path = magnum
 	url = git@github.com:pthom/magnum.git
+[submodule "hunter"]
+	path = hunter
+	url = https://github.com/pthom/hunter
