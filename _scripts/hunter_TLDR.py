@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
+# This script tries to simplify most of the manual actions described in
+# https://docs.hunter.sh/en/latest/creating-new/create/cmake.html
+
 # You will need to install "hub"
 # (a github command line client : https://github.com/github/hub)
+# You will also need to instal click : pip3 install click
 
 import sys
 import os
@@ -10,6 +14,7 @@ import urllib.request
 import hashlib
 import typing
 import shutil
+import click
 
 
 # Predefined types for clarity
@@ -30,12 +35,21 @@ MAIN_REPO = os.path.realpath( THISDIR + "/../") + "/"
 HUNTER_REPO = os.path.realpath( MAIN_REPO + "/hunter/") + "/"
 
 
-def hunter_cmake_file(project: HunterProjectName) -> Filename:
+@click.group()
+def cli():
+  """
+  This script tries to simplify most of the manual actions described in
+  https://docs.hunter.sh/en/latest/creating-new/create/cmake.html
+  """
+  pass
+
+
+def _hunter_cmake_file(project: HunterProjectName) -> Filename:
   result = "{0}/cmake/projects/{1}/hunter.cmake".format(HUNTER_REPO, project)
   return result
 
 
-def hunter_edit_hunter_cmake(
+def _hunter_edit_hunter_cmake(
   hunter_project_name: HunterProjectName,
   cmake_code : CmakeCode
   ):
@@ -57,7 +71,7 @@ def hunter_edit_hunter_cmake(
     """.format(cmake_file, cmake_code))
 
 
-def hunter_edit_default_version(
+def _hunter_edit_default_version(
   hunter_project_name: HunterProjectName,
   release_name : ReleaseName
   ):
@@ -103,10 +117,10 @@ hunter_add_version(
   cmake_version_code = cmake_version_code.replace("__ReleaseName__", release_name)
   cmake_version_code = cmake_version_code.replace("__Url__", url)
   cmake_version_code = cmake_version_code.replace("__Sha1__", sha1)
-  return( hunter_cmake_file(hunter_project_name), cmake_version_code )
+  return( _hunter_cmake_file(hunter_project_name), cmake_version_code )
 
 
-def sha1sum(filename: Filename) -> Sha1String:
+def _sha1sum(filename: Filename) -> Sha1String:
     h = hashlib.sha1()
     with open(filename, 'rb', buffering=0) as f:
         for b in iter(lambda : f.read(128*1024), b''):
@@ -114,18 +128,18 @@ def sha1sum(filename: Filename) -> Sha1String:
     return h.hexdigest()
 
 
-def my_run_command(cmd: Command, cwd: Folder):
+def _my_run_command(cmd: Command, cwd: Folder):
   print("Run command: {0} (in folder {1})".format(cmd, cwd))
   subprocess.run(cmd, cwd = cwd, check=True, shell=True)
 
 
-def github_url_to_url(git_url: GitUrl) -> Url:
+def _github_url_to_url(git_url: GitUrl) -> Url:
   result = git_url.replace("git@github.com:", "https://github.com/")
   result = result.replace(".git", "")
   return result
 
 
-def get_project_push_url(project: HunterProjectName) -> GitUrl:
+def _get_project_push_url(project: HunterProjectName) -> GitUrl:
   print("get_project_push_url({})".format(project))
   repo_folder = MAIN_REPO + project
   result = subprocess.run("git remote show origin", shell=True, cwd=repo_folder, capture_output=True)
@@ -137,8 +151,8 @@ def get_project_push_url(project: HunterProjectName) -> GitUrl:
   return result
 
 
-def get_project_github_url(project):
-  return github_url_to_url( get_project_push_url(project) )
+def _get_project_github_url(project):
+  return _github_url_to_url( _get_project_push_url(project) )
 
 
 def _project_create_release_do_release(
@@ -148,31 +162,43 @@ def _project_create_release_do_release(
         ) -> (Url, Sha1String):
   repo_folder = MAIN_REPO + "/" + hunter_project_name
   cmd = "hub release create -t {0} -m \"{1}\" {1}".format(target_branch, release_name)
-  my_run_command(cmd, repo_folder)
+  _my_run_command(cmd, repo_folder)
 
-  release_url = get_project_github_url(hunter_project_name) + "/archive/" + release_name + ".tar.gz"
+  release_url = _get_project_github_url(hunter_project_name) + "/archive/" + release_name + ".tar.gz"
   print("Created release " + release_url)
   tmp_file = "tmp.tgz"
   print("Downloading release to get its sha1 : {}".format(release_url))
   urllib.request.urlretrieve(release_url, "tmp.tgz")
-  sha1 = sha1sum(tmp_file)
+  sha1 = _sha1sum(tmp_file)
   os.remove(tmp_file)
   return (release_url, sha1)
 
-
+@cli.command()
+@click.argument("project_name", required=True)
+@click.argument("target_branch", required=True)
+@click.argument("release_name", required=True)
 def project_create_release(
-        hunter_project_name : HunterProjectName,
-        release_name: ReleaseName,
-        target_branch: TargetBranch
-        ) -> (Url, Sha1String):
+        project_name : HunterProjectName,
+        target_branch: TargetBranch,
+        release_name: ReleaseName
+        ):
+  """
+  Creates a release on github for a project and optionally publish it to hunter
+  \b
+  Steps:
+  * Creates a github release for a project (which must be subfolder of this repo)
+  * Compute the sha1 of this release
+  * Optionally add this release to hunter/cmake/project/project_name/hunter.cmake
+  * Optionally make this release default in hunter/cmake/configs/defaults.cmake
+  """
   release_url, sha1 = _project_create_release_do_release(
-    hunter_project_name=hunter_project_name,
+    hunter_project_name=project_name,
     release_name=release_name,
     target_branch=target_branch
   )
 
   hunter_cmake_filename, cmake_code = _hunter_add_version_code(
-    hunter_project_name = hunter_project_name,
+    hunter_project_name = project_name,
     release_name = release_name,
     url= release_url,
     sha1 = sha1
@@ -183,100 +209,87 @@ def project_create_release(
   print("And add this code : \n{}".format(cmake_code))
   anwser = input("Shall I edit this file (yes/no)")
   if anwser == "yes":
-    hunter_edit_hunter_cmake(hunter_project_name, cmake_code)
+    _hunter_edit_hunter_cmake(project_name, cmake_code)
 
   print("In order to set this version as default")
   default_cmake_file = HUNTER_REPO + "cmake/configs/default.cmake"
   print("You need to edit the file : {}".format(default_cmake_file))
   anwser = input("Shall I edit this file (yes/no)")
   if anwser == "yes":
-    hunter_edit_default_version(hunter_project_name, release_name)
-  return True
+    _hunter_edit_default_version(project_name, release_name)
 
 
-def project_delete_release(hunter_project_name: HunterProjectName, release_name: ReleaseName):
-  repo_folder = MAIN_REPO + "/" + hunter_project_name
+
+@cli.command()
+@click.argument("project_name", required=True)
+@click.argument("release_name", required=True)
+def project_delete_release(project_name: HunterProjectName, release_name: ReleaseName):
+  """
+  Delete a release from github for a project (a subfolder here)
+  """
+  repo_folder = MAIN_REPO + "/" + project_name
   cmd = "hub release delete {0}".format(release_name)
-  my_run_command(cmd, repo_folder)
+  _my_run_command(cmd, repo_folder)
 
 
-def test_build(app_folder: Folder, clean):
-  app_folder = MAIN_REPO + app_folder
+@cli.command()
+@click.argument("project_name", required=True)
+@click.option("--clean/--no-clean", default = False)
+def test_build(project_name: Folder, clean):
+  """
+  \b
+  Helps to build a project using hunter.
+
+  The project must be a subfolder of this repo).
+  Basically it does this
+
+  \b
+  cd project-name
+  cmake .. -GNinja -DHUNTER_ENABLED=ON
+  ninja
+  """
+  app_folder = MAIN_REPO + project_name
   build_folder = app_folder + "/build"
   if clean:
     if os.path.isdir(build_folder):
       shutil.rmtree(build_folder)
   if not os.path.isdir(build_folder):
     os.mkdir(build_folder)
-  my_run_command("cmake .. -GNinja -DHUNTER_ENABLED=ON", build_folder)
-  my_run_command("ninja", build_folder)
+  _my_run_command("cmake .. -GNinja -DHUNTER_ENABLED=ON", build_folder)
+  _my_run_command("ninja", build_folder)
 
-def add_polly_path():
+
+def _add_polly_path():
   polly_bin_path = ":{}polly/bin".format(MAIN_REPO)
   os.environ["PATH"] = os.environ["PATH"] + ":" + polly_bin_path
 
 
-def polly_help():
-  add_polly_path()
-  my_run_command("polly.py --help", HUNTER_REPO)
+@cli.command()
+def hunter_list_toolchains():
+  """
+  Lists hunter toolchains (polly.py --help)
+  """
+  _add_polly_path()
+  _my_run_command("polly.py --help", HUNTER_REPO)
 
 
-def hunter_test_build(hunter_project_name: HunterProjectName, toolchain: Toolchain):
-  add_polly_path()
-  cmd = "TOOLCHAIN={} PROJECT_DIR=examples/{} ./jenkins.py".format(toolchain, hunter_project_name)
-  my_run_command(cmd, HUNTER_REPO)
+@cli.command()
+@click.argument("project_name", required=True)
+@click.argument("toolchain", required=True)
+def hunter_test_build(project_name: HunterProjectName, toolchain: Toolchain):
+  """
+  Builds a project inside hunter using the given toolchain
 
-
-
-
-def help():
-  help_str = """
-Usage:
-{0} project_create_release HunterProjectName TargetBranch ReleaseName
-{0} project_delete_release HunterProjectName ReleaseName
-{0} test_build app_folder [clean]
-{0} hunter_test_build HunterProjectName Toolchain
-{0} hunter_list_toolchains
-""".format(sys.argv[0])
-  print(help_str)
-
-
-
-
-def main():
-  if len(sys.argv) == 1 or sys.argv[1] == "-h" or sys.argv[1] == "--help":
-    help()
-    sys.exit(1)
-
-  command = sys.argv[1]
-  if command == "project_create_release":
-    hunter_project_name = sys.argv[2]
-    target_branch = sys.argv[3]
-    release_name = sys.argv[4]
-    result = project_create_release(
-      hunter_project_name = hunter_project_name,
-      target_branch = target_branch,
-      release_name = release_name)
-    print(result)
-  elif command == "project_delete_release":
-    hunter_project_name = sys.argv[2]
-    release_name = sys.argv[3]
-    project_delete_release(hunter_project_name, release_name)
-  elif command == "test_build":
-    app_folder = sys.argv[2]
-    clean = False
-    if len(sys.argv) > 3 and sys.argv[3] == "clean":
-      clean = True
-    test_build(app_folder, clean)
-  elif command == "hunter_test_build":
-    hunter_project_name = sys.argv[2]
-    toolchain = sys.argv[3]
-    hunter_test_build(hunter_project_name, toolchain)
-  elif command == "hunter_list_toolchains":
-    polly_help()
-  else:
-    help()
+  \b
+  Basically it does this :
+    > export PATH=$PATH:$(pwd)/polly/bin
+    > cd hunter
+    > TOOLCHAIN=toolchain PROJECT_DIR=examples/project_name jenkins.py
+  """
+  _add_polly_path()
+  cmd = "TOOLCHAIN={} PROJECT_DIR=examples/{} ./jenkins.py".format(toolchain, project_name)
+  _my_run_command(cmd, HUNTER_REPO)
 
 
 if __name__ == "__main__":
-  main()
+  cli()
