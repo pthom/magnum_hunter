@@ -15,3 +15,10 @@ hunter/examples/magnum/
 # Tooling
 
 Install "hub" (kind of github command line client : https://github.com/github/hub)
+
+Install click : pip install click
+
+
+Then run
+````bash
+````
