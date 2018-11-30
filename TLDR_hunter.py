@@ -31,7 +31,7 @@ Command = typing.NewType("Command", str)
 CmakeCode = typing.NewType("CmakeCode", str)
 
 THISDIR = os.path.dirname(os.path.realpath(__file__)) + "/"
-MAIN_REPO = os.path.realpath( THISDIR + "/../") + "/"
+MAIN_REPO = THISDIR
 HUNTER_REPO = os.path.realpath( MAIN_REPO + "/hunter/") + "/"
 
 
