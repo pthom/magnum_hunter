@@ -44,16 +44,22 @@ def cli():
 
   \b
   Info about hunter branching model:
+    * branch test.project_name = this branch contains all the modifications
+      (packages and version + appveyor/travis CI scripts)
+      This branch can be pushed to your own fork of hunter, so that you can test
+      the build through Appveyor and Travis.
+      This is the branch where you work & do your commits, and where you can test the CI
     * branch pr.project_name = pull request candidate for hunter repo
             (https://github.com/ruslo/hunter)
+            This is the same aa the branch test.project_name except for the
+            files appveyor.yml and .travis.yml.
+            ==> Use "hunter-prepare-release" in order to prepare and push this branch.
+            If al goes well, you shall not need to checkout this branch manualy
     * branch pr.pkg.project_name = pull request candidate for hunter package testing templates
             (https://github.com/ingenue/hunter)
             this branch shall contains only modifications to appveyor.yml and .travis.yml
-    * branch test.project_name = this branch contains all the modifications
-      (packages and version + appveyor/travis)
-      This branch can be pushed to your own fork of hunter, so that you can test
-      the build through Appveyor and Travis.
-
+            ==> Use "hunter-prepare-release" in order to prepare and push this branch.
+            If al goes well, you shall not need to checkout this branch manualy
   """
   pass
 
@@ -323,6 +329,10 @@ def hunter_prepare_release():
     the version of hunter master branch
     (This branch must have been created manually)
   * Force push the branch pr.project_name to github
+  *Prepare hunter branch "pr.pkg.project_name"
+      This branch will contains only the modifications to appveyor.yml and .travis.yml.
+      (This branch must have been created manually)
+  * Force push the branch pr.pkg.project_name to github
   * Return you to the branch test.project_name
   """
   # Checks that your hunter submodule status is clean
@@ -330,36 +340,63 @@ def hunter_prepare_release():
     print("Your hunter repo is not clean : abort")
     return False
   # Checks that your hunter submodule status is on a test.[project_name] branch
-  test_git_branch = _git_branch(HUNTER_REPO)
-  if not test_git_branch.find("test.") == 0:
+  test_branch = _git_branch(HUNTER_REPO)
+  if not test_branch.find("test.") == 0:
     print("Your hunter repo should be on a test.[project_name] branch : abort")
     return False
-  project_name = test_git_branch.split(".")[1]
+  project_name = test_branch.split(".")[1]
   print("project_name = " + project_name)
-  print("test_git_branch = " + test_git_branch)
+  print("test_branch = " + test_branch)
   # Prepare hunter branch "pr.project_name":
   #   This branch will be identical to your current branch, except that
   #   it will reset the modification to appveyor.yml and .travis.yml so that they match
   #   the version of hunter master branch
-  pr_pkg_git_branch = "pr.pkg." + project_name
-  print("pr_pkg_git_branch = " + pr_pkg_git_branch)
+  pr_branch = "pr." + project_name
+  pr_pkg_branch = "pr.pkg." + project_name
+  pkg_template_branch = "pkg.template"
+  print("pr_branch = " + pr_branch)
+  print("pr_pkg_branch = " + pr_pkg_branch)
+  print("pkg_template_branch = " + pkg_template_branch)
+  print("")
 
   print("About to run these commands (in order, in subrepo hunter)")
   print("*********************************************************")
-  commands = [
-    "git branch -D {} || true # ==> *delete* old branch !".format(pr_pkg_git_branch),
-    "git checkout -b {} # ==> *recreate* branch from scratch!".format(pr_pkg_git_branch),
-    "rm appveyor.yml && rm .travis.yml # ===> ({} should not contain travis/appveyor.yml".format(pr_pkg_git_branch),
+  commands = [ # phew ! Simple, isn't it ?
+    # Update pr branch
+    "git branch -D {} || true # ==> *delete* old pr branch !".format(pr_branch),
+    "git checkout -b {} # ==> *recreate* pr branch from scratch!".format(pr_branch),
+    "rm appveyor.yml && rm .travis.yml # ===> ({} should not contain travis/appveyor.yml".format(pr_branch),
     "cp ../travis-hunter-master.yml .travis.yml #  ==> copy .travis.yml from master",
     "git add .travis.yml appveyor.yml && git commit -m \"use master branch .travis.yml\" #   ==> git commit !",
-    "git push origin {} --force -u #   ==> git push force !".format(pr_pkg_git_branch),
-    "git checkout {} #   ==> return to the test branch !".format(test_git_branch)
+    "git push origin {} --force -u #   ==> git push force !".format(pr_branch),
+
+    # Return to the test branch
+    "git checkout {} #   ==> return to the test branch !".format(test_branch),
+
+    # Add upstream_pkg remote
+    "(git remote add upstream_pkg https://github.com/ingenue/hunter.git || true) && git fetch upstream_pkg",
+
+    # Update pr.pkg branch
+    "git branch -D {} || true # ==> *delete* old pr.pkg branch !".format(pr_pkg_branch),
+    "cp .travis.yml ../backup-travis && cp appveyor.yml ../backup-appveyor # ==> backup travis and appveyor scripts",
+    "git checkout {} #   ==> checkoout to the pkg_template_branch branch !".format(pkg_template_branch),
+    "git checkout -b {} # ==> *recreate* pr.pkg branch from scratch!".format(pr_pkg_branch),
+    "cp -f ../backup-travis .travis.yml && cp -f ../backup-appveyor appveyor.yml # ==> restore backup travis and appveyor scripts",
+    "git add .travis.yml appveyor.yml # ==> stage appveyor and travis modifications",
+    "git commit -m \"update travis and appveyor\" # commit travis and appveyor",
+    "git push origin {} -f # ==> git push force !".format(pr_pkg_branch),
+    "rm ../backup-travis && rm ../backup-appveyor # ==> remove backup travis and appveyor scripts",
+
+    # Return to the test branch
+    "git checkout {} #   ==> return to the test branch !".format(test_branch),
+
+    # Remove upstream remote
+    "git remote rm upstream_pkg # Remove upstream_pkg remote (because the hub command tool does not work with several remote)"
   ]
   i = 1
   for cmd in commands:
     print("            {}. {}".format(i, cmd))
     i = i + 1
-
 
   i = 1
   for cmd in commands:
@@ -458,18 +495,36 @@ def hunter_test_docs():
   _my_run_command("source ./jenkins.sh && ./make.sh", cwd = HUNTER_REPO + "/docs")
 
 
-
-@cli.command()
-def hunter_browse_ci():
-  """
-  open hunter CI results in a browser (travis & appveyor)
-  """
+def _do_browse_ci():
   hunter_url_github = _get_project_github_url("hunter")
   hunter_repo_name = hunter_url_github.replace("https://github.com/", "")
   url_travis = "https://travis-ci.org/" + hunter_repo_name
   url_appveyor = "https://ci.appveyor.com/project/" + hunter_repo_name
   webbrowser.open(url_travis)
   webbrowser.open(url_appveyor)
+
+
+@cli.command()
+def hunter_push_modifs():
+  """
+  Push hunter modifs / browse CI results
+  """
+  test_git_branch = _git_branch(HUNTER_REPO)
+  if not test_git_branch.find("test.") == 0:
+    print("Your hunter repo should be on a test.[project_name] branch : abort")
+    return False
+  _my_run_command("git push", cwd = HUNTER_REPO)
+  answer = input("open CI results in the browser ? Type y to open them: ")
+  if answer == "y":
+    _do_browse_ci()
+
+
+@cli.command()
+def hunter_browse_ci():
+  """
+  open hunter CI results in a browser (travis & appveyor)
+  """
+  _do_browse_ci()
 
 
 if __name__ == "__main__":
