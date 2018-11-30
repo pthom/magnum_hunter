@@ -1,4 +1,4 @@
-[] cli to open hunter CI (travis & appveyor) in the browser
+[X] cli to open hunter CI (travis & appveyor) in the browser
 [] Re-enable build Android & iOS via hunter
 [] Investigate GlyphCache issue
   [] Give clues on hunter CI

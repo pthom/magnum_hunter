@@ -15,6 +15,7 @@ import hashlib
 import typing
 import shutil
 import click
+import webbrowser
 
 
 # Predefined types for clarity
@@ -447,6 +448,19 @@ def hunter_test_build(project_name: HunterProjectName, toolchain: Toolchain):
   _add_polly_path()
   cmd = "TOOLCHAIN={} PROJECT_DIR=examples/{} ./jenkins.py".format(toolchain, project_name)
   _my_run_command(cmd, HUNTER_REPO)
+
+
+@cli.command()
+def hunter_browse_ci():
+  """
+  open hunter CI results in a browser (travis & appveyor)
+  """
+  hunter_url_github = _get_project_github_url("hunter")
+  hunter_repo_name = hunter_url_github.replace("https://github.com/", "")
+  url_travis = "https://travis-ci.org/" + hunter_repo_name
+  url_appveyor = "https://ci.appveyor.com/project/" + hunter_repo_name
+  webbrowser.open(url_travis)
+  webbrowser.open(url_appveyor)
 
 
 if __name__ == "__main__":
