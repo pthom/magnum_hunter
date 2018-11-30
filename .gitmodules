@@ -7,3 +7,6 @@
 [submodule "hunter"]
 	path = hunter
 	url = https://github.com/pthom/hunter
+[submodule "polly"]
+	path = polly
+	url = git@github.com:ruslo/polly.git
