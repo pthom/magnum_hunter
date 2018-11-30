@@ -1,4 +1,5 @@
 [X] cli to open hunter CI (travis & appveyor) in the browser
+  [X] Also push test branch
 [X] Correct pb / docs (orthograph !)
   [X] cli / test hunter doc
 [] Re-enable build Android & iOS via hunter
@@ -12,3 +13,4 @@
   [] Make doc & prepare PR magnum
     [] Explain how to add options to the magnum package build
     [] Decide about default patches
+[] magnum-plugins ???
