@@ -451,6 +451,15 @@ def hunter_test_build(project_name: HunterProjectName, toolchain: Toolchain):
 
 
 @cli.command()
+def hunter_test_docs():
+  """
+  Tests that the hunter docs build correctly
+  """
+  _my_run_command("source ./jenkins.sh && ./make.sh", cwd = HUNTER_REPO + "/docs")
+
+
+
+@cli.command()
 def hunter_browse_ci():
   """
   open hunter CI results in a browser (travis & appveyor)
