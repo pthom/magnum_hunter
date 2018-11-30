@@ -1,6 +1,6 @@
 [X] cli to open hunter CI (travis & appveyor) in the browser
-[] Correct pb / docs (orthograph !)
-  [] cli / test hunter doc
+[X] Correct pb / docs (orthograph !)
+  [X] cli / test hunter doc
 [] Re-enable build Android & iOS via hunter
 [] Investigate GlyphCache issue
   [] Give clues on hunter CI
