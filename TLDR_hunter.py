@@ -205,6 +205,7 @@ def project_create_release(
         ):
   """
   Creates a release on github for a project and optionally publish it to hunter
+
   \b
   Steps:
   * Creates a github release for a project (which must be subfolder of this repo)
