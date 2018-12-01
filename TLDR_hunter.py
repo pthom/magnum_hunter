@@ -445,20 +445,20 @@ def hunter_create_release(release_name: ReleaseName):
     print("abort")
     return False
 
-  test_git_branch = _git_branch(HUNTER_REPO)
-  if not test_git_branch.find("test.") == 0:
+  test_branch = _git_branch(HUNTER_REPO)
+  if not test_branch.find("test.") == 0:
     print("Your hunter repo should be on a test.[project_name] branch : abort")
     return False
-  project_name = test_git_branch.split(".")[1]
-  pr_pkg_git_branch = "pr.pkg." + project_name
+  project_name = test_branch.split(".")[1]
+  pr_branch = "pr." + project_name
   print("project_name = " + project_name)
-  print("test_git_branch = " + test_git_branch)
-  print("pr_pkg_git_branch = " + pr_pkg_git_branch)
+  print("test_branch = " + test_branch)
+  print("pr_branch = " + pr_branch)
 
   release_url, sha1 = _project_create_release_do_release(
     hunter_project_name="hunter",
     release_name=release_name,
-    target_branch=pr_pkg_git_branch
+    target_branch=pr_branch
   )
   print("Release url:" + release_url)
   print("sha1:" + sha1)
