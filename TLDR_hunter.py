@@ -73,9 +73,11 @@ def _hunter_edit_hunter_cmake(
   with open(cmake_file, "r") as f:
     lines = f.readlines()
   output = ""
+  done = False
   for line in lines:
-    if "hunter_add_version(" in line:
+    if "hunter_add_version(" in line and done == False:
       output = output + "\n" + cmake_code + "\n"
+      done = True
     output = output + line
   with open(cmake_file, "w") as f:
     f.write(output)
