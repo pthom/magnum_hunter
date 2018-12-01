@@ -31,9 +31,9 @@ Folder = typing.NewType("Folder", str)
 Command = typing.NewType("Command", str)
 CmakeCode = typing.NewType("CmakeCode", str)
 
-THISDIR = os.path.dirname(os.path.realpath(__file__)) + "/"
+THISDIR = os.path.dirname(os.path.realpath(__file__)) + os.sep
 MAIN_REPO = THISDIR
-HUNTER_REPO = os.path.realpath( MAIN_REPO + "/hunter/") + "/"
+HUNTER_REPO = os.path.realpath( MAIN_REPO + "/hunter/") + os.sep
 
 
 @click.group()
@@ -254,6 +254,10 @@ def project_delete_release(project_name: HunterProjectName, release_name: Releas
   _my_run_command(cmd, repo_folder)
 
 
+def _is_windows():
+  return os.name == "Windows" or os.name == "nt"
+
+
 @cli.command()
 @click.argument("project_name", required=True)
 @click.option("--clean/--no-clean", default = False)
@@ -270,8 +274,7 @@ def test_build(project_name: Folder, clean):
   cmake .. -GNinja -DHUNTER_ENABLED=ON
   ninja
   """
-  is_windows = os.name == "Windows" or os.name == "nt"
-  if is_windows:
+  if _is_windows():
     cmake_generator = "\"Visual Studio 14 2015\""
     os.environ["HUNTER_BINARY_DIR"] = "C:\HunterTmp"
   else:
@@ -284,15 +287,19 @@ def test_build(project_name: Folder, clean):
   if not os.path.isdir(build_folder):
     os.mkdir(build_folder)
   _my_run_command("cmake .. -G{} -DHUNTER_ENABLED=ON".format(cmake_generator), build_folder)
-  if is_windows:
+  if _is_windows():
     pass
   else:
     _my_run_command("ninja", build_folder)
 
 
+# python TLDR_hunter.py hunter-test-build magnum vs-15-2017-win64
+
+
 def _add_polly_path():
-  polly_bin_path = ":{}polly/bin".format(MAIN_REPO)
-  os.environ["PATH"] = os.environ["PATH"] + ":" + polly_bin_path
+  polly_bin_path = "{}polly".format(MAIN_REPO) + os.sep + "bin"
+  os.environ["PATH"] = os.environ["PATH"] + os.pathsep + polly_bin_path
+  print(os.environ["PATH"])
 
 
 @cli.command()
@@ -301,7 +308,10 @@ def hunter_list_toolchains():
   Lists hunter toolchains (polly.py --help)
   """
   _add_polly_path()
-  _my_run_command("polly.py --help", HUNTER_REPO)
+  if _is_windows():
+    _my_run_command("polly.bat --help", HUNTER_REPO)
+  else:
+    _my_run_command("polly.py --help", HUNTER_REPO)
 
 
 def _is_git_repo_clean(folder: Folder) -> bool:
@@ -395,7 +405,9 @@ def hunter_test_build(project_name: HunterProjectName, toolchain: Toolchain):
     > TOOLCHAIN=toolchain PROJECT_DIR=examples/project_name jenkins.py
   """
   _add_polly_path()
-  cmd = "TOOLCHAIN={} PROJECT_DIR=examples/{} ./jenkins.py".format(toolchain, project_name)
+  os.environ["TOOLCHAIN"] = toolchain
+  os.environ["PROJECT_DIR"] = "examples/" + project_name
+  cmd = "python jenkins.py"
   _my_run_command(cmd, HUNTER_REPO)
 
 
