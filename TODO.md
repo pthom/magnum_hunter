@@ -54,18 +54,16 @@
       However, the situation as it is is acceptable,
       since I left some explanations, and another person can hande this in the future.
 
-* [ ] Magnum issues:
-  * [ ] Merge hunter related modifications
+* [ ] Magnum repo:
+  * [ ] Merge hunter related modifications ?
     See https://github.com/mosra/magnum/compare/master...pthom:magnum_hunter?
-  * [ ] Investigate GlyphCache issue
-  * [ ] Investigate error with TOOLCHAIN=sanitize-address-cxx17
-    cf https://travis-ci.org/pthom/hunter/jobs/461801690
+  * [X] Investigate GlyphCache issue
   * [ ] Report error in magnum/package/archlinux/*emscripten* :
     `-WDITH_WINDOWLESSEGLAPPLICATION` instead of `-DWITH_WINDOWLESSEGLAPPLICATION`
 
 
-* [X] Magnum_hunter repo<br/>
-  tool to help building the packages (https://github.com/pthom/magnum_hunter)
+* [X] magnum_hunter repo<br/>
+  * [X] Add tool to help building the packages (https://github.com/pthom/magnum_hunter)
   * [X] Test this repo from scratch on an empty docker linux box
   * [X] Make doc & prepare PR magnum
     * [X] Explain how to add options to the magnum package build
