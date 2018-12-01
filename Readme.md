@@ -61,33 +61,33 @@ hunter/examples/magnum/
 ## TODO
 
 * [X] Corrade hunter package
-  * [X] Build and test package on all platforms
-    See https://travis-ci.org/pthom/hunter/builds/462197201 and https://ci.appveyor.com/project/pthom/hunter/builds/20699264
+  * [X] Build and test package on all platforms<br/>
+    See https://travis-ci.org/pthom/hunter/builds/462197201 and <br/> https://ci.appveyor.com/project/pthom/hunter/builds/20699264
     * [X] Correct pb / docs (badly configured spell-checker in hunter !)
-    * [X-] Re-enable build Android & iOS via hunter
-        * [X] Build native corrade-rc
+    * [X] Re-enable build Android & iOS via hunter
+        * [X] Build native corrade-rc<br/>
         -> Done with the addition of a script magnum-build-corrade-rc.sh to hunter
         (I do not know if this will be accepted)
         * [X] Build iOS and android in the hunter CI for corrade
   * [ ] Push PR to hunter (and hope that the hack for corrade-rc will pass)
 
 * [X] Magnum hunter package
-  * [X] Status :
-    https://travis-ci.org/pthom/hunter/builds/462213975
-    and
+  * [X] Status :<br/>
+    https://travis-ci.org/pthom/hunter/builds/462213975<br/>
+    and<br/>
     https://ci.appveyor.com/project/pthom/hunter/builds/20700057
-  * [X] Decide about default packages
-      See https://github.com/pthom/hunter/blob/pr.magnum/cmake/projects/magnum/hunter.cmake
+  * [X] Decide about default packages<br/>
+      See https://github.com/pthom/hunter/blob/pr.magnum/cmake/projects/magnum/hunter.cmake<br/>
       I took inspiration from the various magnum packages. It proved to be way too difficuly to try
       to find a set of common options for all the platforms, so that it is separated per platform.
   * [X] Check Magnum correct CI compilation inside Hunter
     * [X] OSX / Linux
-    * [X] Windows
+    * [X] Windows<br/>
       However, I had to disable the sound in windows because of an issue in hunter's `OpenAL`
       package. Hopefuly someone will fix this in the near future.
     * [ ] Cross-Compilation
       * [X] Build native corrade-rc
-      * [ ] Build Android -> Fail
+      * [ ] Build Android -> Fail<br/>
           See https://travis-ci.org/pthom/hunter/jobs/462202107
           ````bash
           CMake Error at cmake/Magnum/FindMagnum.cmake:839 (find_package):
@@ -99,7 +99,7 @@ hunter/examples/magnum/
             OpenGLES3Config.cmake
             opengles3-config.cmake
           ````
-      * [ ] build iOS -> Fail
+      * [ ] build iOS -> Fail<br/>
       See https://travis-ci.org/pthom/hunter/jobs/462202114
       ````bash
       [hunter ** FATAL ERROR **] 'find_package(EGL)' should be called with REQUIRED
