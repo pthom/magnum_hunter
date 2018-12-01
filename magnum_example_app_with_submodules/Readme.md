@@ -1,26 +1,27 @@
-## An example magnum program built using hunter
+## An example magnum program built using hunter with configurations
 
-It uses hunter the way that is described in the hunter docs except* for the fact that it builds the hunter packages from submodules (see magnum_example_app/cmake/Hunter/config.cmake)
+It uses hunter the way that is described in the hunter docs, and adds the possibility to configure magnum
+and use a specific version of magnum code from a submodule.
 
 ### Structure
 
 ````
-├── CMakeLists.txt                # The LOCAL param inside the HunterGate() call inside CMakeLists.txt
+├── CMakeLists.txt                # The 'LOCAL' param inside the HunterGate() call inside CMakeLists.txt
 ├── PrimitivesExample.cpp         # will cause cmake/Hunter/config.cmake to be read
 ├── Readme.md
-├── cmake
+├── cmake/
 │   ├── Hunter
 │   │   └── config.cmake           # specifies to build corrade and magnum from submodules
 │   └── HunterGate.cmake
-└── third_party
-    ├── corrade -> ../../corrade   # symlinks
-    └── magnum -> ../../magnum
+└── third_party/
+    ├── corrade/                   # submodule
+    └── magnum/                    # submodule
 ````
 
 
 ### Steps :
 
-* Fetch HunterGate.cmake from `https://github.com/hunter-packages/gate/blob/master/cmake/HunterGate.cmake`
+* Fetch HunterGate.cmake from `https://github.com/hunter-packages/gate/blob/master/cmake/HunterGate.cmake`<br/>
   and copy it to `cmake/HunterGate.cmake`
 * Inside `CMakeLists.txt`, just add this in order to get magnum
 ````cmake
@@ -32,7 +33,9 @@ HunterGate(
 project(MagnumPrimitivesExample)
 hunter_add_package(magnum)
 ````
-You will need to adjust the correct url and sha1 (see https://docs.hunter.sh/en/latest/packages/all.html)
+
+You will need to adjust the correct url and sha1 (see https://docs.hunter.sh/en/latest/packages/all.html)<br/>
+
 The LOCAL params means that you intend to add some configuration options.
 
 ### Configuration
@@ -42,13 +45,10 @@ The LOCAL params means that you intend to add some configuration options.
 If you want to fetch magnum from a submodule (instead of using the standard hunter releaqe), write this
 ````cmake
 hunter_config(corrade GIT_SUBMODULE "corrade")
-hunter_config(magnum GIT_SUBMODULE "magnum" CMAKE_ARGS WITH_OBJIMPORTER=ON)
+hunter_config(magnum GIT_SUBMODULE "magnum")
 ````
 
-Note : after CMAKE_ARGS, you can alter the magnum cmake flags.
-
-
-If you only want to modify the CMAKE_ARGS and specify the version, you can write:
+If you want to modify the CMAKE_ARGS and specify the version, you can write:
 
 ````cmake
 hunter_config(magnum VERSION v2018.12 CMAKE_ARGS WITH_AUDIO=OFF)
