@@ -26,10 +26,11 @@ endif()
 
 include("cmake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/pthom/hunter/archive/magnum_hunter_v7.tar.gz"
-    SHA1 "76032a6ea7d3496dc3e79b55c797713e229a3685"
-  )
+    URL "https://github.com/pthom/hunter/archive/magnum_hunter_v11.tar.gz"
+    SHA1 "609986f76ed9f53a72595c59ea142ed41713d089"
+)
 project(MagnumPrimitivesExample)
+
 hunter_add_package(magnum)
 
 # Add module path in case this is project root
