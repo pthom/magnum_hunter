@@ -293,8 +293,6 @@ def test_build(project_name: Folder, clean):
     _my_run_command("ninja", build_folder)
 
 
-# python TLDR_hunter.py hunter-test-build magnum vs-15-2017-win64
-
 
 def _add_polly_path():
   polly_bin_path = "{}polly".format(MAIN_REPO) + os.sep + "bin"
@@ -405,6 +403,8 @@ def hunter_test_build(project_name: HunterProjectName, toolchain: Toolchain):
     > TOOLCHAIN=toolchain PROJECT_DIR=examples/project_name jenkins.py
   """
   _add_polly_path()
+  if _is_windows():
+    os.environ["HUNTER_BINARY_DIR"] = "C:\HunterTmp"
   os.environ["TOOLCHAIN"] = toolchain
   os.environ["PROJECT_DIR"] = "examples/" + project_name
   cmd = "python jenkins.py"
