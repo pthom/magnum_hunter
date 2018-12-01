@@ -19,6 +19,13 @@ and thus may used cached binaries from an artifactory.
 * Inside `CMakeLists.txt`, just add this in order to get magnum
 
 ````cmake
+set(
+    HUNTER_CACHE_SERVERS
+    "https://github.com/elucideye/hunter-cache;https://github.com/ingenue/hunter-cache"
+    CACHE
+    STRING
+    "Hunter cache servers"
+)
 include("cmake/HunterGate.cmake")
 HunterGate(
     URL "https://github.com/ruslo/hunter/archive/v2018.12.tar.gz"
@@ -27,5 +34,6 @@ project(MagnumPrimitivesExample)
 hunter_add_package(magnum)
 ````
 
-Note: <br/>
-You will need to adjust the correct url and sha1 (see https://docs.hunter.sh/en/latest/packages/all.html)
+Notes: <br/>
+* You will need to adjust the correct url and sha1 (see https://docs.hunter.sh/en/latest/packages/all.html)
+* HUNTER_CACHE_SERVERS is a list of servers from where precompiled libraries may be downloaded

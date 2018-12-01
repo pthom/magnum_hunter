@@ -24,6 +24,13 @@ if(POLICY CMP0054)
     cmake_policy(SET CMP0054 NEW)
 endif()
 
+set(
+    HUNTER_CACHE_SERVERS
+    "https://github.com/elucideye/hunter-cache;https://github.com/ingenue/hunter-cache"
+    CACHE
+    STRING
+    "Hunter cache servers"
+)
 include("cmake/HunterGate.cmake")
 HunterGate(
     URL "https://github.com/pthom/hunter/archive/pr.magnum.v1.tar.gz"
