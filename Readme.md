@@ -65,6 +65,7 @@ hunter/examples/magnum/
   https://docs.hunter.sh/en/latest/creating-new/create/cmake.html
 
 *Prerequisites*
+* python 3
 * Install "hub" (github command line client) : https://github.com/github/hub
 * Install click : pip install click
 

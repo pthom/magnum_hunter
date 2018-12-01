@@ -293,6 +293,20 @@ def test_build(project_name: Folder, clean):
     _my_run_command("ninja", build_folder)
 
 
+def _has_python3_exe():
+  try:
+    _my_run_command("which python3", MAIN_REPO)
+  except:
+    return False
+  return True
+
+def python3_exe():
+  if _has_python3_exe():
+    python3_exe = "python3"
+  else:
+    python3_exe = "python"
+  return python3_exe
+
 
 def _add_polly_path():
   polly_bin_path = "{}polly".format(MAIN_REPO) + os.sep + "bin"
@@ -407,7 +421,7 @@ def hunter_test_build(project_name: HunterProjectName, toolchain: Toolchain):
     os.environ["HUNTER_BINARY_DIR"] = "C:\HunterTmp"
   os.environ["TOOLCHAIN"] = toolchain
   os.environ["PROJECT_DIR"] = "examples/" + project_name
-  cmd = "python jenkins.py"
+  cmd = python3_exe() + " jenkins.py"
   _my_run_command(cmd, HUNTER_REPO)
 
 
