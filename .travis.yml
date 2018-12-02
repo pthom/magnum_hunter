@@ -35,7 +35,7 @@ before_install:
   - if [[ "`uname`" == "Darwin" ]]; then travis_retry brew install gnu-sed; alias sed=gsed; fi
 
     # Install click
-  - pip3 install click
+  - pip3 install --user click
 
   # Use sed to replace the submodules with the public URL, then initialize submodules
   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
