@@ -10,6 +10,9 @@
         -> Done with the addition of a script magnum-build-corrade-rc.sh to hunter
         (I do not know if this will be accepted)
         * [X] Build iOS and android in the hunter CI for corrade
+    * [ ] Re-enable build mingw and msys
+
+
 
 * [X] Magnum hunter package
   * [ ] Push PR to hunter (and hope that the hack for corrade-rc will pass)
@@ -27,6 +30,8 @@
     * [X] Windows<br/>
       However, I had to disable the sound in windows because of an issue in hunter's `OpenAL`
       package. Hopefuly someone will fix this in the near future.
+    * [X] sanitizers : cxx analyze / sanitize-address -> disable (problem inside SDL2 actually)
+    * [ ] Re-enable build mingw and msys
     * [ ] Cross-Compilation
       * [X] Build native corrade-rc
       * [ ] Build Android -> Fail<br/>
@@ -58,7 +63,7 @@
   * [ ] Merge hunter related modifications ?
     See https://github.com/mosra/magnum/compare/master...pthom:magnum_hunter?
   * [X] Investigate GlyphCache issue
-  * [ ] Report error in magnum/package/archlinux/*emscripten* :
+  * [X] Report error in magnum/package/archlinux/*emscripten* :
     `-WDITH_WINDOWLESSEGLAPPLICATION` instead of `-DWITH_WINDOWLESSEGLAPPLICATION`
 
 
