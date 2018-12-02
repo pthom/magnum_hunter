@@ -12,9 +12,6 @@ addons:
       - python3-pip
       - g++-7
 
-git:
-    submodules: false
-
 before_install:
   # Disable autoupdate
   - export HOMEBREW_NO_AUTO_UPDATE=1
