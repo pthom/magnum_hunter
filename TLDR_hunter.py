@@ -274,7 +274,7 @@ def test_build(project_name: Folder, toolchain: Toolchain, clean):
 
   \b
   export PATH=$(pwd)/polly/bin:$PATH
-  mkidr build.project_name
+  mkdir build.project_name
   cd build.project_name
   polly.py --home --toolchain toolchain  # polly.py is a building script provided by polly
 

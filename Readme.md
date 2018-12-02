@@ -72,6 +72,29 @@ hunter/examples/magnum/
 
 ````bash
 
+
+TLDR_hunter.py test-build PROJECT_NAME [TOOLCHAIN]
+
+  Helps to build a project using hunter.
+
+  The project must be a subfolder of this repo).
+  Basically it does this:
+
+  \b
+  export PATH=$(pwd)/polly/bin:$PATH
+  mkdir build.project_name
+  cd build.project_name
+  polly.py --home --toolchain toolchain  # polly.py is a building script provided by polly
+
+  \b
+  Notes:
+  * polly.py selects automatically the correct cmake generator according to the toolchain
+  * Use `hunter-list-toolchains --filter` in order to find the available toolchains
+  * if you want to use the toolchains manually, do:
+  > cmake your/src/folder -DCMAKE_TOOLCHAIN_FILE=path/to/polly/toolchain.cmake
+
+*************
+
 TLDR_hunter.py project-create-release PROJECT_NAME TARGET_BRANCH RELEASE_NAME
 
   Creates a release on github for a project and optionally publish it to
@@ -89,17 +112,4 @@ TLDR_hunter.py hunter-create-release RELEASE_NAME
   Publish a release on your hunter fork and assist you to use this hunter
   release in a sample app
 
-*************
-
-TLDR_hunter.py hunter-test-build PROJECT_NAME TOOLCHAIN
-
-  Builds a project inside hunter using the given toolchain
-
-  Basically it does this :
-    > export PATH=$PATH:$(pwd)/polly/bin
-    > cd hunter
-    > TOOLCHAIN=toolchain PROJECT_DIR=examples/project_name jenkins.py
-
-You can list the toolchains using
-./TLDR_hunter.py hunter-list-toolchains
 ````
