@@ -12,24 +12,23 @@ import os
 import subprocess
 import urllib.request
 import hashlib
-import typing
 import shutil
 import click
 import webbrowser
 
 
 # Predefined types for clarity
-ReleaseName = typing.NewType("ReleaseName", str)
-TargetBranch = typing.NewType("TargetBranch", str)
-Toolchain = typing.NewType("Toolchain", str)
-HunterProjectName = typing.NewType("HunterProjectName", str)
-Sha1String = typing.NewType("Sha1String", str)
-Url = typing.NewType("Url", str)
-GitUrl = typing.NewType("GitUrl", str)
-Filename = typing.NewType("Filename", str)
-Folder = typing.NewType("Folder", str)
-Command = typing.NewType("Command", str)
-CmakeCode = typing.NewType("CmakeCode", str)
+ReleaseName = str
+TargetBranch = str
+Toolchain = str
+HunterProjectName = str
+Sha1String = str
+Url = str
+GitUrl = str
+Filename = str
+Folder = str
+Command = str
+CmakeCode = str
 
 THISDIR = os.path.dirname(os.path.realpath(__file__)) + os.sep
 MAIN_REPO = THISDIR
