@@ -14,10 +14,28 @@ addons:
 
 git:
     submodules: false
-# Use sed to replace the SSH URL with the public URL, then initialize submodules
+
 before_install:
-    - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-    - git submodule update --init --recursive
+  # Disable autoupdate
+  - export HOMEBREW_NO_AUTO_UPDATE=1
+
+  # Install Python 3
+  - if [[ "`uname`" == "Darwin" ]]; then travis_retry brew upgrade python || echo "Ignoring failure..."; fi
+  - if [[ "`uname`" == "Darwin" ]]; then travis_retry brew install python3; fi
+
+  # Install Python package 'requests'
+  # 'easy_install3' is not installed by 'brew install python3' on OS X 10.9 Maverick
+  - if [[ "`uname`" == "Darwin" ]]; then pip3 install requests; fi
+  - if [[ "`uname`" == "Darwin" ]]; then pip3 install gitpython; fi
+  - if [[ "`uname`" == "Linux" ]]; then travis_retry pip3 install --user requests; fi
+  - if [[ "`uname`" == "Linux" ]]; then travis_retry pip3 install --user gitpython; fi
+
+  # Install gnu sed for osx
+  - if [[ "`uname`" == "Darwin" ]]; then travis_retry brew install gnu-sed; alias sed=gsed; fi
+
+  # Use sed to replace the submodules with the public URL, then initialize submodules
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
 
 
 dist:
@@ -94,19 +112,6 @@ install:
   # Info about available disk space
   - df -h $HOME
 
-  # Disable autoupdate
-  - export HOMEBREW_NO_AUTO_UPDATE=1
-
-  # Install Python 3
-  - if [[ "`uname`" == "Darwin" ]]; then travis_retry brew upgrade python || echo "Ignoring failure..."; fi
-  - if [[ "`uname`" == "Darwin" ]]; then travis_retry brew install python3; fi
-
-  # Install Python package 'requests'
-  # 'easy_install3' is not installed by 'brew install python3' on OS X 10.9 Maverick
-  - if [[ "`uname`" == "Darwin" ]]; then pip3 install requests; fi
-  - if [[ "`uname`" == "Darwin" ]]; then pip3 install gitpython; fi
-  - if [[ "`uname`" == "Linux" ]]; then travis_retry pip3 install --user requests; fi
-  - if [[ "`uname`" == "Linux" ]]; then travis_retry pip3 install --user gitpython; fi
 
   # Install latest Polly toolchains and scripts
   - wget --quiet https://github.com/ruslo/polly/archive/master.zip
