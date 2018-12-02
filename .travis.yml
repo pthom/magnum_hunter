@@ -37,7 +37,7 @@ before_install:
 
 
 dist:
-  - trusty
+  - xenial
 
 matrix:
   include:
