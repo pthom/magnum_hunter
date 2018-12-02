@@ -262,37 +262,40 @@ def _is_windows():
 
 @cli.command()
 @click.argument("project_name", required=True)
+@click.argument("toolchain", default="default")
 @click.option("--clean/--no-clean", default = False)
-def test_build(project_name: Folder, clean):
+def test_build(project_name: Folder, toolchain: Toolchain, clean):
   """
   \b
   Helps to build a project using hunter.
 
   The project must be a subfolder of this repo).
-  Basically it does this
+  Basically it does this:
 
   \b
-  cd project-name
-  cmake .. -GNinja -DHUNTER_ENABLED=ON
-  ninja
+  export PATH=$(pwd)/polly/bin:$PATH
+  mkidr build.project_name
+  cd build.project_name
+  polly.py --home --toolchain toolchain  # polly.py is a building script provided by polly
+
+  \b
+  Notes:
+  * polly.py selects automatically the correct cmake generator according to the toolchain
+  * Use `hunter-list-toolchains --filter` in order to find the available toolchains
+  * if you want to use the toolchains manually, do:
+  > cmake your/src/folder -DCMAKE_TOOLCHAIN_FILE=path/to/polly/toolchain.cmake
   """
-  if _is_windows():
-    cmake_generator = "\"Visual Studio 14 2015\""
-    os.environ["HUNTER_BINARY_DIR"] = "C:\HunterTmp"
-  else:
-    cmake_generator = "Ninja"
-  app_folder = MAIN_REPO + project_name
-  build_folder = app_folder + "/build"
+  _add_polly_path()
+  project_folder = MAIN_REPO + project_name
+  build_folder = "{}/build.{}".format(MAIN_REPO, project_name)
   if clean:
     if os.path.isdir(build_folder):
       shutil.rmtree(build_folder)
   if not os.path.isdir(build_folder):
     os.mkdir(build_folder)
-  _my_run_command("cmake .. -G{} -DHUNTER_ENABLED=ON".format(cmake_generator), build_folder)
-  if _is_windows():
-    pass
-  else:
-    _my_run_command("ninja", build_folder)
+  _my_run_command(
+    "polly.py --home {} --toolchain {}".format(project_folder, toolchain),
+    build_folder)
 
 
 def _has_python3_exe():
@@ -317,15 +320,30 @@ def _add_polly_path():
 
 
 @cli.command()
-def hunter_list_toolchains():
+@click.option("--filter", default = "")
+def hunter_list_toolchains(filter: str):
   """
   Lists hunter toolchains (polly.py --help)
   """
   _add_polly_path()
   if _is_windows():
-    _my_run_command("polly.bat --help", HUNTER_REPO)
+    out = _my_run_command_get_output("polly.bat --help", HUNTER_REPO)
   else:
-    _my_run_command("polly.py --help", HUNTER_REPO)
+    out = _my_run_command_get_output("polly.py --help", HUNTER_REPO)
+  lines = out.split("\n")
+  toolchains = []
+  start = False
+  for line in lines:
+    if "optional arguments" in line:
+      break
+    if start == True and len(line.strip())> 0:
+      toolchains.append(line.strip())
+    if "Available toolchains" in line:
+      start = True
+  result = ""
+  filtered_toolchains = [ t for t  in toolchains if filter in t ]
+  result = "\n".join(filtered_toolchains)
+  print(result)
 
 
 def _is_git_repo_clean(folder: Folder) -> bool:
@@ -333,6 +351,7 @@ def _is_git_repo_clean(folder: Folder) -> bool:
   lines = out.split("\n")
   is_clean = any( [ "working tree clean" in line for line in lines] )
   return is_clean
+
 
 def _git_branch(folder: Folder) -> str:
   out = _my_run_command_get_output("git branch", cwd=folder)
