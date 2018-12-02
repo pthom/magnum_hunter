@@ -137,13 +137,13 @@ script:
   # replace symlinks by real checkouts in magnum_example_app_with_submodules/third_party
   - TOPDIR=$(pwd)
   - rm magnum_example_app_with_submodules/third_party/corrade
-  - rm magnum_example_app_with_submodules/third_party/magnum
-  - cp -a corrade magnum_example_app_with_submodules/third_party/corrade
-  - cp -a magnum magnum_example_app_with_submodules/third_party/magnum
+  - mv corrade magnum_example_app_with_submodules/third_party/corrade
   - cd magnum_example_app_with_submodules/third_party/corrade
   - git reset --hard
   - git clean -fd
   - cd $(TOPDIR)
+  - rm magnum_example_app_with_submodules/third_party/magnum
+  - mv magnum magnum_example_app_with_submodules/third_party/magnum
   - cd magnum_example_app_with_submodules/third_party/magnum
   - git reset --hard
   - git clean -fd
