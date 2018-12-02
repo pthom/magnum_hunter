@@ -1,16 +1,14 @@
 language:
   - cpp
-  - python: "3.6"
 
 sudo:
-  - false
+  - true
 
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - python3-pip
       - g++-7
 
 git:
@@ -20,9 +18,29 @@ before_install:
   # Disable autoupdate
   - export HOMEBREW_NO_AUTO_UPDATE=1
 
+  # Info about python
+  - python3 --version
+  - pip3 --version
+
   # Install Python 3
   - if [[ "`uname`" == "Darwin" ]]; then travis_retry brew upgrade python || echo "Ignoring failure..."; fi
   - if [[ "`uname`" == "Darwin" ]]; then travis_retry brew install python3; fi
+
+  - |
+    if [[ ! "`uname`" == "Darwin" ]]; then
+      sudo apt-get install software-properties-common -y
+      sudo add-apt-repository ppa:jonathonf/python-3.6 -y
+      sudo apt-get update
+      sudo apt-get install python3.6
+      sudo apt-get install python3-pip
+    fi
+
+  # Info about python
+  - python3 --version
+  - pip3 --version
+
+  # Install click
+  - pip3 install --user click
 
   # Install Python package 'requests'
   # 'easy_install3' is not installed by 'brew install python3' on OS X 10.9 Maverick
@@ -31,8 +49,6 @@ before_install:
   - if [[ "`uname`" == "Linux" ]]; then travis_retry pip3 install --user requests; fi
   - if [[ "`uname`" == "Linux" ]]; then travis_retry pip3 install --user gitpython; fi
 
-    # Install click
-  - pip3 install --user click
 
 
 dist:
@@ -104,10 +120,6 @@ install:
 
   # Info about available disk space
   - df -h $HOME
-
-  # Info about python
-  - python3 --version
-  - pip3 --version
 
   # Install latest Polly toolchains and scripts
   - wget --quiet https://github.com/ruslo/polly/archive/master.zip
