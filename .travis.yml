@@ -2,7 +2,7 @@ language:
   - cpp
 
 sudo:
-  - true
+  - false
 
 addons:
   apt:
