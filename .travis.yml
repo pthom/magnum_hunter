@@ -104,6 +104,10 @@ install:
   # Info about available disk space
   - df -h $HOME
 
+  # Info about python
+  - python3 --version
+  - pip3 --version
+
   # Install latest Polly toolchains and scripts
   - wget --quiet https://github.com/ruslo/polly/archive/master.zip
   - unzip -q master.zip
