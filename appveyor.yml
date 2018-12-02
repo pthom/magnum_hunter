@@ -36,9 +36,10 @@ install:
   # Python 3
   - cmd: set PATH=C:\Python34-x64;C:\Python34-x64\Scripts;%PATH%
 
-  # Install Python package 'requests', 'gitpython'
+  # Install Python package 'requests', 'gitpython', 'click'
   - cmd: pip install requests
   - cmd: pip install gitpython
+  - cmd: pip install click
 
   # Install latest Polly toolchains and scripts
   - cmd: appveyor DownloadFile https://github.com/ruslo/polly/archive/master.zip
@@ -73,4 +74,10 @@ install:
   - cmd: set VS150COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools
 
 build_script:
+    - cmd: REM replace symlinks by real checkouts in magnum_example_app_with_submodules/third_party
+    - cmd: del magnum_example_app_with_submodules/third_party/corrade
+    - cmd: del magnum_example_app_with_submodules/third_party/magnum
+    - cmd: robocopy corrade magnum_example_app_with_submodules/third_party/corrade /s /e
+    - cmd: robocopy magnum magnum_example_app_with_submodules/third_party/magnum /s /e
+    - cmd: REM build !
     - cmd: python TLDR_hunter.py test-build magnum_example_app_with_submodules %TOOLCHAIN%

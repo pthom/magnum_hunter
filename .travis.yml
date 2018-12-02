@@ -139,4 +139,5 @@ script:
     rm magnum_example_app_with_submodules/third_party/magnum
     cp -a corrade magnum_example_app_with_submodules/third_party/corrade
     cp -a magnum magnum_example_app_with_submodules/third_party/magnum
+  # build !
   - python3 ./TLDR_hunter.py test-build magnum_example_app_with_submodules $TOOLCHAIN
