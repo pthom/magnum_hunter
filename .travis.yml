@@ -18,9 +18,9 @@ before_install:
   # Disable autoupdate
   - export HOMEBREW_NO_AUTO_UPDATE=1
 
-  # Info about python
-  - python3 --version
-  - pip3 --version
+  # # Info about python
+  # - python3 --version
+  # - pip3 --version
 
   # Install Python 3
   - if [[ "`uname`" == "Darwin" ]]; then travis_retry brew upgrade python || echo "Ignoring failure..."; fi
