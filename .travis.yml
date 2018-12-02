@@ -134,12 +134,19 @@ script:
       ./magnum-build-corrade-rc.sh
       export PATH=$PATH:~/corrade-rc-bin
     fi
-  - | # replace symlinks by real checkouts in magnum_example_app_with_submodules/third_party
-    rm magnum_example_app_with_submodules/third_party/corrade
-    rm magnum_example_app_with_submodules/third_party/magnum
-    cp -a corrade magnum_example_app_with_submodules/third_party/corrade
-    cp -a magnum magnum_example_app_with_submodules/third_party/magnum
-    cd magnum_example_app_with_submodules/third_party/corrade && git reset --hard && git clean -fd && cd -
-    cd magnum_example_app_with_submodules/third_party/magnum && git reset --hard && git clean -fd && cd -
+  # replace symlinks by real checkouts in magnum_example_app_with_submodules/third_party
+  - TOPDIR=$(pwd)
+  - rm magnum_example_app_with_submodules/third_party/corrade
+  - rm magnum_example_app_with_submodules/third_party/magnum
+  - cp -a corrade magnum_example_app_with_submodules/third_party/corrade
+  - cp -a magnum magnum_example_app_with_submodules/third_party/magnum
+  - cd magnum_example_app_with_submodules/third_party/corrade
+  - git reset --hard
+  - git clean -fd
+  - cd $(TOPDIR)
+  - cd magnum_example_app_with_submodules/third_party/magnum
+  - git reset --hard
+  - git clean -fd
+  - cd $(TOPDIR)
   # build !
   - python3 ./TLDR_hunter.py test-build magnum_example_app_with_submodules $TOOLCHAIN
