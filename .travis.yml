@@ -138,4 +138,4 @@ script:
       ./magnum-build-corrade-rc.sh
       export PATH=$PATH:~/corrade-rc-bin
     fi
-  - TLDR_hunter.py test-build magnum_example_app_with_submodules $TOOLCHAIN
+  - ./TLDR_hunter.py test-build magnum_example_app_with_submodules $TOOLCHAIN
