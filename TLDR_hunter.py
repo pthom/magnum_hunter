@@ -147,12 +147,12 @@ def _sha1sum(filename: Filename) -> Sha1String:
 
 def _my_run_command(cmd: Command, cwd: Folder):
   print("Run command: {0} (in folder {1})".format(cmd, cwd))
-  subprocess.run(cmd, cwd = cwd, check=True, shell=True)
+  return subprocess.check_call(cmd, cwd = cwd, shell=True)
 
 
 def _my_run_command_get_output(cmd: Command, cwd: Folder):
-  result = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True)
-  out = result.stdout.decode("utf-8")
+  stdout = subprocess.check_output(cmd, shell=True, cwd=cwd)
+  out = stdout.decode("utf-8")
   return out
 
 
