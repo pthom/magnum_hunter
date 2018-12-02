@@ -73,4 +73,4 @@ install:
   - cmd: set VS150COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools
 
 build_script:
-    - cmd: python3 TLDR_hunter.py test-build magnum_example_app_with_submodules %TOOLCHAIN%
+    - cmd: python TLDR_hunter.py test-build magnum_example_app_with_submodules %TOOLCHAIN%
