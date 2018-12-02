@@ -5,36 +5,30 @@ environment:
   matrix:
 
     - TOOLCHAIN: "ninja-vs-15-2017-win64-cxx17"
-      PROJECT_DIR: examples\magnum
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       HUNTER_BINARY_DIR: C:\__BIN
 
     - TOOLCHAIN: "nmake-vs-15-2017-win64-cxx17"
-      PROJECT_DIR: examples\magnum
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       HUNTER_BINARY_DIR: C:\__BIN
 
     - TOOLCHAIN: "vs-15-2017-win64-cxx17"
-      PROJECT_DIR: examples\magnum
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       HUNTER_BINARY_DIR: C:\__BIN
 
     - TOOLCHAIN: "vs-14-2015-sdk-8-1"
-      PROJECT_DIR: examples\magnum
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       HUNTER_BINARY_DIR: C:\__BIN
 
     # FIXME: mingw is not supported by this package
     # Since corrade (which is a dependency) does not build under mingw
     # - TOOLCHAIN: "mingw-cxx17"
-    #   PROJECT_DIR: examples\magnum
     #   APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     #   HUNTER_BINARY_DIR: C:\__BIN
 
     # FIXME: msys is not supported by this package
     # Since corrade (which is a dependency) does not build under msys
     # - TOOLCHAIN: "msys-cxx17"
-    #   PROJECT_DIR: examples\magnum
     #   APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     #   HUNTER_BINARY_DIR: C:\__BIN
 
@@ -78,5 +72,5 @@ install:
   # Visual Studio 15 2017: Mimic behavior of older versions
   - cmd: set VS150COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools
 
-# build_script:
-#   - cmd: python .\jenkins.py
+build_script:
+    - cmd: python3 TLDR_hunter.py test-build magnum_example_app_with_submodules %TOOLCHAIN%
