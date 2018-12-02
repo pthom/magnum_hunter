@@ -9,6 +9,7 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
     packages:
+      - python3-pip
       - g++-7
 
 git:
@@ -18,22 +19,9 @@ before_install:
   # Disable autoupdate
   - export HOMEBREW_NO_AUTO_UPDATE=1
 
-  # # Info about python
-  # - python3 --version
-  # - pip3 --version
-
   # Install Python 3
   - if [[ "`uname`" == "Darwin" ]]; then travis_retry brew upgrade python || echo "Ignoring failure..."; fi
   - if [[ "`uname`" == "Darwin" ]]; then travis_retry brew install python3; fi
-
-  - |
-    if [[ ! "`uname`" == "Darwin" ]]; then
-      sudo apt-get install software-properties-common -y
-      sudo add-apt-repository ppa:jonathonf/python-3.6 -y
-      sudo apt-get update
-      sudo apt-get install python3.6
-      sudo apt-get install python3-pip
-    fi
 
   # Info about python
   - python3 --version
