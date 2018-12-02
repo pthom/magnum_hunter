@@ -139,8 +139,8 @@ script:
   - rm magnum_example_app_with_submodules/third_party/corrade
   - rm magnum_example_app_with_submodules/third_party/magnum
   - cd magnum_example_app_with_submodules/third_party
-  - git clone $(TOPDIR)/corrade
-  - git clone $(TOPDIR)/magnum
-  - cd $(TOPDIR)
+  - git clone $TOPDIR/corrade
+  - git clone $TOPDIR/magnum
+  - cd $TOPDIR
   # build !
   - python3 ./TLDR_hunter.py test-build magnum_example_app_with_submodules $TOOLCHAIN
