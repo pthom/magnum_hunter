@@ -292,9 +292,12 @@ def test_build(project_name: Folder, toolchain: Toolchain, clean):
       shutil.rmtree(build_folder)
   if not os.path.isdir(build_folder):
     os.mkdir(build_folder)
-  _my_run_command(
-    "polly.py --home {} --toolchain {}".format(project_folder, toolchain),
-    build_folder)
+  if _is_windows():
+    polly = "polly.bat"
+  else:
+    polly = "polly.py"
+  cmd = "{} --home {} --toolchain {}".format(polly, project_folder, toolchain)
+  _my_run_command(cmd, build_folder)
 
 
 def _has_python3_exe():
