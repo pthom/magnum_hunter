@@ -1,30 +1,35 @@
 ## TODO
 
-* [X] Corrade hunter package
+
+* [ ] Corrade hunter package
+  * [ ] Hunter CI Back to travis ? (requires quite some boilerplate commits). What is your opinion?
+  * [ ] Create a release on corrade main repo
+  * [ ] Add the release link and it's sha1 to hunter / make it the default and only version
   * [ ] Push PR to hunter (and hope that the hack for corrade-rc will pass)
-  * [X] Build and test package on all platforms<br/>
-    See https://travis-ci.org/pthom/hunter/builds/462197201 and <br/> https://ci.appveyor.com/project/pthom/hunter/builds/20699264
-    * [X] Correct pb / docs (badly configured spell-checker in hunter !)
-    * [X] Re-enable build Android & iOS via hunter
-        * [X] Build native corrade-rc<br/>
-        -> Done with the addition of a script magnum-build-corrade-rc.sh to hunter
-        (I do not know if this will be accepted)
-        * [X] Build iOS and android in the hunter CI for corrade
-    * [ ] Re-enable build mingw and msys
+  * [ ] Proof read the readme inside hunter
+  * [ ] Push PR to hunter building repo
+        (and hope that the hack for corrade-rc will pass)
+  * [ ] Push PR to hunter main repo
 
+* [ ] Magnum hunter package
+  * [ ] Hunter CI Back to travis ? (requires quite some boilerplate commits)
+  * [ ] Merge magnum_hunter branch
+  * [ ] Create a release on corrade main repo
+  * [ ] Add the release link and it's sha1 to hunter / make it the default and only version
+  * [ ] Proof read the readme inside hunter
+  * [ ] Push PR to hunter building repo
+        (and hope that the hack for corrade-rc will pass)
+  * [ ] Push PR to hunter main repo
 
+* Magnum
+  * [ ] Integrate example_apps into magnum-bootstrap ?
+  * [ ] What to do about the magnum_hunter repo itself (which can be useful for future maintainers of the hunter package, or people wanting to add hunter plugins)
 
 * [X] Magnum hunter package
   * [ ] Push PR to hunter (and hope that the hack for corrade-rc will pass)
     * [ ] This require to have another magnum release where some small patches are applied (see below)
-  * [X] Status :<br/>
-    https://travis-ci.org/pthom/hunter/builds/462213975<br/>
-    and<br/>
-    https://ci.appveyor.com/project/pthom/hunter/builds/20700057
-  * [X] Decide about default packages<br/>
-      See https://github.com/pthom/hunter/blob/pr.magnum/cmake/projects/magnum/hunter.cmake<br/>
-      I took inspiration from the various magnum packages. It proved to be way too difficuly to try
-      to find a set of common options for all the platforms, so that it is separated per platform.
+  * [ ] Status :<br/>
+  * [ ] Check default packages<br/>
   * [X] Check Magnum correct CI compilation inside Hunter
     * [X] OSX / Linux
     * [X] Windows<br/>
