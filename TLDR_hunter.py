@@ -275,7 +275,7 @@ def test_build(project_name: Folder, toolchain: Toolchain, clean):
   export PATH=$(pwd)/polly/bin:$PATH
   mkdir build.project_name
   cd build.project_name
-  polly.py --home --toolchain toolchain  # polly.py is a building script provided by polly
+  polly.py --home --toolchain toolchain --fwd HUNTER_ENABLED=ON # polly.py is a building script provided by polly
 
   \b
   Notes:
@@ -296,7 +296,7 @@ def test_build(project_name: Folder, toolchain: Toolchain, clean):
     polly = "polly.bat"
   else:
     polly = "polly.py"
-  cmd = "{} --home {} --toolchain {}".format(polly, project_folder, toolchain)
+  cmd = "{} --home {} --toolchain {} --fwd HUNTER_ENABLED=ON".format(polly, project_folder, toolchain)
   _my_run_command(cmd, build_folder)
 
 
